@@ -1,7 +1,7 @@
 <h1 align="center">Self Hosting Bocchi 🎸🚀</h1>
 
 <p align="center">
-  <img src="./BocchiCode.png" alt="Bocchi Code>
+  <img src="./BocchiCode.png" alt="Bocchi Code">
 </p>
 
 ---
