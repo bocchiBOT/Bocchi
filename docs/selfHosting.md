@@ -13,7 +13,9 @@ This guide will help you **how to run Bocchi** on your own instance locally or o
 ## ⚙️ Requirements
 
 **Node.js** 16.11.0 or higher
+
 **MongoDB atlas** 
+
 **pnpm** better than npm for performance
 
 ---
