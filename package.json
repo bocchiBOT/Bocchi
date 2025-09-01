@@ -1,0 +1,38 @@
+{
+  "name": "bocchi",
+  "version": "1.0.0-beta.1",
+  "description": "bocchizinha",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "release": "cross-env NODE_ENV=production node --optimize_for_size --max-old-space-size=8192 --unhandled-rejections=strict index.js"
+  },
+  "keywords": [
+    "discord",
+    "discord-bot",
+    "discord.js",
+    "javascript",
+    "node.js",
+    "bot",
+    "bocchi",
+    "bocchi-bot",
+    "bocchibot"
+  ],
+  "author": "Kz",
+  "license": "GPL-3.0-only",
+  "packageManager": "pnpm@10.15.0",
+  "dependencies": {
+    "discord.js": "^14.22.1",
+    "dotenv": "^17.2.1",
+    "mongodb": "^6.19.0"
+  },
+  "devDependencies": {
+    "cross-env": "^10.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bocchiBOT/Bocchi.git"
+  },
+  "homepage": "https://github.com/bocchiBOT"
+}
