@@ -1,7 +1,7 @@
 <h1 align="center">Bocchi 🎸⚡</h1>
 
 <p align="center">
-  <img src="docs/BocchiClap.gif" alt="Bocchi Clapping>
+  <img src="docs/BocchiClap.gif" alt="Bocchi Clapping">
 </p>
 
 ---
