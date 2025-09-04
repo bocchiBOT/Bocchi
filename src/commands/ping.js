@@ -1,4 +1,5 @@
 import { SlashCommandBuilder, EmbedBuilder, MessageFlags } from 'discord.js';
+import logger from '../utils/logger.js';
 
 export const data = new SlashCommandBuilder()
     .setName('ping')
@@ -30,7 +31,7 @@ export async function execute(interaction) {
                 status = 'Bom';
                 statusEmoji = '🟡';
             } else if (wsLatency <= 500) {
-                status = 'Regular';
+                status = 'Médio';
                 statusEmoji = '🟠';
             } else {
                 status = 'Ruim';
@@ -62,10 +63,7 @@ export async function execute(interaction) {
                         inline: false 
                     }
                 )
-                .setFooter({ 
-                    text: `Shard: ${interaction.guild?.shardId ?? 0}` 
-                })
-                .setTimestamp();
+                .setFooter({ text: `Shard: ${interaction.guild ? interaction.guild.shardId : 'N/A'}` })
         };
 
         // Edit the initial message
@@ -74,44 +72,34 @@ export async function execute(interaction) {
             embeds: [createEmbed(wsLatency)] 
         });
 
-        if (wsLatency === -1) {
-            const maxChecks = 6;
-            let checks = 0;
-            
-            const checkInterval = setInterval(async () => {
-                wsLatency = interaction.client.ws.ping;
-                checks++;
-                
-                if (wsLatency !== -1 || checks >= maxChecks) {
-                    clearInterval(checkInterval);
-                    
-                    if (wsLatency !== -1) {
-                        await interaction.editReply({
-                            content: '**🏓 Pong!**',
-                            embeds: [createEmbed(wsLatency)]
-                        });
-                    }
-                }
-            }, 5000);
-        }
+    if (wsLatency === -1) {
+      const maxChecks = 6;
+      let checks = 0;
 
-    } catch (error) {
-        logger.error('Erro no comando ping:', error);
-        
-        try {
-            if (interaction.replied || interaction.deferred) {
-                await interaction.followUp({ 
-                    content: '❌ Ocorreu um erro ao calcular o ping.', 
-                    flags: [MessageFlags.Ephemeral] 
-                });
-            } else {
-                await interaction.reply({ 
-                    content: '❌ Ocorreu um erro ao calcular o ping.', 
-                    flags: [MessageFlags.Ephemeral] 
-                });
-            }
-        } catch (replyError) {
-            logger.error('Erro ao enviar mensagem de erro:', replyError);
+      const checkWsPing = async () => {
+        wsLatency = interaction.client.ws.ping;
+        checks++;
+
+        if (wsLatency !== -1 || checks >= maxChecks) {
+          if (wsLatency !== -1) {
+            await interaction.editReply({
+              content: '**🏓 Pong!**',
+              embeds: [createEmbed(wsLatency)]
+            });
+          }
+        } else {
+          setTimeout(checkWsPing, 5000); 
         }
+      };
+
+      setTimeout(checkWsPing, 5000);
     }
+
+  } catch (error) {
+    logger.error("Error in the ping command:", error);
+    try {
+      const respond = interaction.deferred || interaction.replied ? interaction.followUp : interaction.reply;
+      await respond({ content: "❌ Ocorreu um erro inesperado.", flags: [MessageFlags.Ephemeral] });
+    } catch {}
+  }
 }

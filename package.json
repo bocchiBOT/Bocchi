@@ -1,6 +1,6 @@
 {
   "name": "bocchi",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.1-beta.1",
   "description": "bocchizinha",
   "main": "index.js",
   "type": "module",
@@ -21,8 +21,10 @@
   ],
   "author": "Kz",
   "license": "GPL-3.0-only",
-  "packageManager": "pnpm@10.15.0",
+  "packageManager": "pnpm@10.15.1",
   "dependencies": {
+    "@napi-rs/canvas": "^0.1.78",
+    "dayjs": "^1.11.18",
     "discord.js": "^14.22.1",
     "dotenv": "^17.2.1",
     "mongodb": "^6.19.0"

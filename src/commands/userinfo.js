@@ -1,5 +1,11 @@
-import { SlashCommandBuilder, EmbedBuilder, MessageFlags, time} from 'discord.js';
+import { SlashCommandBuilder, EmbedBuilder, MessageFlags, time } from 'discord.js';
 import logger from '../utils/logger.js';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime.js';
+import 'dayjs/locale/pt-br.js';
+
+dayjs.extend(relativeTime);
+dayjs.locale('pt-br');
 
 export const data = new SlashCommandBuilder()
     .setName('userinfo')
@@ -13,62 +19,39 @@ export const data = new SlashCommandBuilder()
 
 export async function execute(interaction) {
     try {
-        const member = interaction.options.getMember('usuário') || interaction.member;
-        const user = member.user;
+        const targetMember = interaction.options.getMember('usuário') || interaction.member;
+        const targetUser = targetMember.user;
 
-        // Datas
-        const createdAt = user.createdAt;
-        const joinedAt = member.joinedAt;
+        const createdAt = targetUser.createdAt;
+        const joinedAt = targetMember.joinedAt;
 
-        // Função de diferença no formato customizado
-        const formatTimeDifference = (date) => {
-            const now = new Date();
-            const diffMs = now - date;
-            const diffSec = Math.floor(diffMs / 1000);
-            const diffMin = Math.floor(diffSec / 60);
-            const diffHours = Math.floor(diffMin / 60);
-            const diffDays = Math.floor(diffHours / 24);
-
-            const years = Math.floor(diffDays / 365);
-            const months = Math.floor((diffDays % 365) / 30);
-            const days = diffDays % 30;
-            const hours = diffHours % 24;
-            const minutes = diffMin % 60;
-
-            if (years > 0) return `há ${years} ano${years > 1 ? 's' : ''}`;
-            if (months > 0) return `há ${months} mês${months > 1 ? 'es' : ''}`;
-            if (days > 0) return `há ${days} dia${days > 1 ? 's' : ''}`;
-            if (hours > 0) return `há ${hours} hora${hours > 1 ? 's' : ''}`;
-            if (minutes > 0) return `há ${minutes} minuto${minutes > 1 ? 's' : ''}`;
-            return 'agora mesmo';
-        };
+        const createdDiff = dayjs(createdAt).fromNow();
+        const joinedDiff = joinedAt ? dayjs(joinedAt).fromNow() : '❌ Não disponível';
 
         const embed = new EmbedBuilder()
-            .setColor(member.displayColor || 0x3498DB)
-            .setAuthor({ name: `${member.displayName}`, iconURL: user.displayAvatarURL({ size: 256 }) })
-            .setThumbnail(user.displayAvatarURL({ size: 512 }))
+            .setColor(targetMember.displayColor || 0x3498DB)
+            .setAuthor({ name: `${targetMember.displayName}`, iconURL: targetUser.displayAvatarURL({ size: 256 }) })
+            .setThumbnail(targetUser.displayAvatarURL({ size: 512 }))
             .addFields(
-                { name: '🆔 ID:', value: `\`${user.id}\``, inline: true },
-                { name: '🏷️ Tag:', value: `\`${user.tag}\``, inline: true },
-                { name: '📅 Conta criada em:', value: `${time(createdAt, 'f')} (${formatTimeDifference(createdAt)})`, inline: false },
-                { name: '🚪 Entrou no servidor em:', value: joinedAt ? `${time(joinedAt, 'f')} (${formatTimeDifference(joinedAt)})` : '❌ Não disponível', inline: false },
-                { name: '⬆ Maior cargo:', value: member.roles.highest?.id !== interaction.guild.id ? `${member.roles.highest}` : 'Nenhum', inline: true },
-                { name: '🤖 É bot?', value: user.bot ? '✅ Sim' : '❌ Não', inline: true }
-            )
+                { name: '🆔 ID:', value: `\`${targetUser.id}\``, inline: true },
+                { name: '🏷️ Tag:', value: `\`${targetUser.tag}\``, inline: true },
+                { name: '📅 Conta criada em:', value: `${time(createdAt, 'f')} (${createdDiff})`, inline: false },
+                { name: '🚪 Entrou no servidor em:', value: joinedAt ? `${time(joinedAt, 'f')} (${joinedDiff})` : '❌ Não disponível', inline: false },
+                { name: '⬆ Maior cargo:', value: targetMember.roles.highest?.id !== interaction.guild.id ? `${targetMember.roles.highest}` : 'Nenhum', inline: true },
+                { name: '🤖 É bot?', value: targetUser.bot ? '✅ Sim' : '❌ Não', inline: true }
+            );
 
         await interaction.reply({
-            content: `Informações de ${user}`,
+            content: `Informações de ${targetUser}`,
             embeds: [embed],
             flags: [MessageFlags.Ephemeral]
         });
 
     } catch (error) {
-        logger.error('Erro no comando userinfo:', error);
-
-        if (interaction.replied || interaction.deferred) {
-            await interaction.followUp({ content: '❌ Ocorreu um erro ao buscar as informações do usuário!', flags: [MessageFlags.Ephemeral] });
-        } else {
-            await interaction.reply({ content: '❌ Ocorreu um erro ao buscar as informações do usuário!', flags: [MessageFlags.Ephemeral] });
-        }
+        logger.error("Error in the userinfo command:", error);
+        try {
+            const respond = interaction.deferred || interaction.replied ? interaction.followUp : interaction.reply;
+            await respond({ content: "❌ Ocorreu um erro inesperado.", flags: [MessageFlags.Ephemeral] });
+        } catch {}
     }
 }

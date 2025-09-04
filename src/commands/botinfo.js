@@ -5,7 +5,7 @@ import emojis from '../utils/emojis.js';
 
 export const data = new SlashCommandBuilder()
     .setName('botinfo')
-    .setDescription('Veja algumas informações sobre o bot.');
+    .setDescription('❔🤖 Veja algumas informações sobre o bot.');
 
 export async function execute(interaction) {
     try {
@@ -18,8 +18,7 @@ export async function execute(interaction) {
         const ownerLink = `https://discord.com/users/${ownerId}`;
         const githubLink = 'https://github.com/bocchiBOT';
 
-        const image = `https://i.postimg.cc/tTgWZMGF/Bocchi-Clap.gif`;
-
+        const EmbedImage = `https://i.postimg.cc/1X9zBQ93/Bocchi-Clapping.gif`;
 
         const embed = new EmbedBuilder()
             .setColor(0xFF69B4)
@@ -29,7 +28,7 @@ export async function execute(interaction) {
                 `Atualmente estou em **${totalGuilds} servidores** servindo **${totalUsers} usuários**`
 
             )
-            .setImage(image)
+            .setImage(EmbedImage)
 
         const row = new ActionRowBuilder().addComponents(
             new ButtonBuilder()
@@ -50,13 +49,11 @@ export async function execute(interaction) {
             flags: [MessageFlags.Ephemeral]
         });
 
-    } catch (error) {
-        logger.error('Erro no comando bocchiinfo:', error);
-
-        if (interaction.replied || interaction.deferred) {
-            await interaction.followUp({ content: '❌ Ocorreu um erro ao mostrar as informações do bot!', flags: [MessageFlags.Ephemeral] });
-        } else {
-            await interaction.reply({ content: '❌ Ocorreu um erro ao mostrar as informações do bot!', flags: [MessageFlags.Ephemeral] });
-        }
-    }
+  } catch (error) {
+    logger.error("Error in the botinfo command:", error);
+    try {
+      const respond = interaction.deferred || interaction.replied ? interaction.followUp : interaction.reply;
+      await respond({ content: "❌ Ocorreu um erro inesperado.", flags: [MessageFlags.Ephemeral] });
+    } catch {}
+  }
 }
